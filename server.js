@@ -16,7 +16,7 @@ var FitbitApiClient = require("fitbit-node");
 var client = new FitbitApiClient(env.CLIENT_ID, env.CLIENT_SECRET);
 
 // Use the session middleware
-router.use(session({ secret: env.SESSION_SECRET, cookie: { maxAge: 60000 }, resave: false, saveUninitialized: true }));
+router.use(session({ secret: env.SESSION_SECRET, resave: false, saveUninitialized: true }));
 
 // redirect the user to the Fitbit authorization page
 router.get("/authorize", function(req, res) {
