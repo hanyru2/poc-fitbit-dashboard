@@ -5,7 +5,7 @@
     "main": "server.js",
     "repository": "",
     "scripts": {
-        "start": "nodemon node server.js"
+        "start": "node server.js"
     },
     "author": "Wichit Yaowapapong <y.wichit@gmail.com>",
     "dependencies": {
