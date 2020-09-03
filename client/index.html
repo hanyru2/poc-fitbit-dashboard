@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en" ng-app>
+
+<head>
+    <title>Fitbit API Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
+    <style>
+        body {
+            padding-top: 60px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" ng-controller="ChatController">
+        <div class="navbar navbar-fixed-top navbar-inverse">
+            <div class="navbar-inner">
+                <div class="pull-right">
+                    <a href="https://dev.fitbit.com/apps/" class="brand">Fitbit</a>
+                </div>
+            </div>
+        </div>
+        <div class="page-header">
+            <h1>Fitbit API Example</h1>
+        </div>
+        <div class="container">
+            <div class="row controls">
+                <a class="login btn btn-success" href="/authorize">Login</a>
+                <div class="well user">
+                    <div class="row">
+                        <img class="avatar span4" style="width: 150px; height: 150px" src="">
+                        <h2 class="fullname span4"></h2>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <p class="span12">gender : <span class="gender"></span></p>
+                        <p class="span12">weight : <span class="weight"></span></p>
+                        <p class="span12">height : <span class="height"></span></p>
+                        <p class="span12">sleepTracking : <span class="sleepTracking"></span></p>
+                        <p class="span12">startDayOfWeek : <span class="startDayOfWeek"></span></p>
+                    </div>
+                    <div class="row top-badge" style="margin-top: 20px;">
+                        <img class="span4 badge-icon" style="width: 50px; height: 50px" src="">
+                        <h3 class="span8 badge-name"></h3>
+
+                        <p class="span12 badge-description"></p>
+
+                    </div>
+                    <a class="btn btn-warning" href="/logout">Logout</a>
+                </div>
+                <br/>
+                <br/>
+                <div class="well user">
+                    <div class="row devices">
+
+                    </div>
+                </div>
+                <br/>
+                <br/>
+                <div class="well user">
+                    <div class="row">
+                        <button class="span2 btn btn-info" onclick="getActivities('2020-09-02')">2020-09-02</button>
+                        <button class="span2 btn btn-info" onclick=" getActivities( '2020-09-03')">2020-09-03</button>
+                    </div>
+                    <div class="row activities">
+
+                    </div>
+                    <div class="row heartrate">
+
+                    </div>
+                </div>
+                <br/>
+                <br/>
+                <p>
+                    <a class="btn btn-secondary" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+              Show API Response
+            </a>
+                </p>
+                <div class="collapse" id="collapseExample">
+                    <div class="card card-block">
+                        <p class="response=profile"></p>
+                    </div>
+                    <div class="card card-block">
+                        <p class="response-devices"></p>
+                    </div>
+                    <div class="card card-block">
+                        <p class="response-activities"></p>
+                    </div>
+                    <div class="card card-block">
+                        <p class="response-heartrate"></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script>
+        $.getJSON('/profile').done(function(response) {
+            $('a.login').hide();
+            $('.avatar').attr('src', response.user.avatar);
+            $('.fullname').text(response.user.fullName);
+            $('.gender').text(response.user.gender);
+            $('.weight').text(response.user.weight);
+            $('.height').text(response.user.height);
+            $('.sleepTracking').text(response.user.sleepTracking);
+            $('.startDayOfWeek').text(response.user.startDayOfWeek);
+            if (response.user.topBadges.length > 0) {
+                var topBadge = response.user.topBadges[0];
+                console.log("topBadge ", topBadge)
+                $('.badge-name').text(topBadge.name);
+                $('.badge-description').text(topBadge.marketingDescription);
+                $('.badge-icon').attr('src', topBadge.image50px);
+            } else {
+                $('.top-badge').hide();
+            }
+
+            $('p.response-profile').html(" <strong>profile</strong> : " + JSON.stringify(response));
+        }).fail(function(error) {
+            $('p.response-profile').html(" <strong>profile</strong> : " + JSON.stringify(error));
+            $('.user').hide();
+        });
+
+        $.getJSON('/devices').done(function(response) {
+            var html = '<div>';
+            for(var i=0; i<response.length; i++) {
+                html += '<h4 class="span12">device : ' + response[i].deviceVersion + '</h4>';
+                html += '<p class="span12">type : ' + response[i].type + '</p>';
+                html += '<p class="span12">lastSyncTime : ' + response[i].lastSyncTime + '</p>';
+            }
+
+            html += '</div><br/>';
+            $('.devices').html(html);
+            
+            $('p.response-devices').html(" <strong>devices</strong> : " + JSON.stringify(response));
+        }).fail(function(error) {
+            $('p.response-devices').html(" <strong>devices</strong> : " + JSON.stringify(error));
+            $('.user').hide();
+        });
+
+        function getActivities(date) {
+            $.getJSON('/activities/' + date).done(function(response) {
+                var html = '<div>';
+                html += '<h3 class="span12">' + date + '</h3>';
+                html += '<p class="span12">steps : ' + response.summary.steps + '</p>';
+                html += '<p class="span12">distance : ' + response.summary.distances[0].distance + '</p>';
+                html += '<p class="span12">caloriesOut : ' + response.summary.caloriesOut + '</p>';
+                html += '</div>';
+                $('.activities').html(html);
+
+                $('p.response-activities').html(" <strong>activities</strong> : " + JSON.stringify(response));
+            }).fail(function(error) {
+                $('p.response-activities').html(" <strong>activities</strong> : " + JSON.stringify(error));
+            });
+
+            $.getJSON('/heartrate/' + date).done(function(response) {
+                var html = '<div>';
+                html += '<h3 class="span12">Heart Rate</h3>';
+                html += '<p class="span12">caloriesOut : ' + response['activities-heart'][0].value.heartRateZones[0].caloriesOut + '</p>';
+                html += '<p class="span12">max : ' + response['activities-heart'][0].value.heartRateZones[0].max + '</p>';
+                html += '<p class="span12">min : ' + response['activities-heart'][0].value.heartRateZones[0].min + '</p>';
+                html += '<p class="span12">minutes : ' + response['activities-heart'][0].value.heartRateZones[0].minutes + '</p>';
+                html += '<p class="span12">restingHeartRate : ' + response['activities-heart'][0].value.restingHeartRate + '</p>';
+                
+
+                html += '</div>';
+                $('.heartrate').html(html);
+
+                $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(response));
+            }).fail(function(error) {
+                $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(error));
+            });
+        }
+    </script>
+</body>
+
+</html>
