@@ -76,6 +76,7 @@ router.get('/activities/:date', function(req, res) {
         // var prevdateNewFormat = prevdate.getFullYear() + "-" + ("0" + (prevdate.getMonth() + 1)).slice(-2) + "-" + ("0" + prevdate.getDate()).slice(-2);
         // var params = "beforeDate=" + nowdateNewFormat + "&sort=asc&offset=0&limit=10";
         client.get("/activities/date/" + req.params.date + ".json", req.session.access_token).then(function(results) {
+            console.log(results)
             res.json(results[0]);
         });
     } else {
