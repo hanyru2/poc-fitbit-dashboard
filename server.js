@@ -67,7 +67,7 @@ router.get('/devices', function(req, res) {
     }
 });
 
-router.get('/activities/:date', function(req, res) {
+router.get('/activities/:date/:userId', function(req, res) {
     if (req.session.authorized) {
         // var nowdate = new Date()
         // var nowdateNewFormat = nowdate.getFullYear() + "-" + ("0" + (nowdate.getMonth() + 1)).slice(-2) + "-" + ("0" + nowdate.getDate()).slice(-2);
@@ -75,8 +75,7 @@ router.get('/activities/:date', function(req, res) {
         // prevdate = new Date(prevdate.setDate(prevdate.getDate() - 10))
         // var prevdateNewFormat = prevdate.getFullYear() + "-" + ("0" + (prevdate.getMonth() + 1)).slice(-2) + "-" + ("0" + prevdate.getDate()).slice(-2);
         // var params = "beforeDate=" + nowdateNewFormat + "&sort=asc&offset=0&limit=10";
-        client.get("/activities/date/" + req.params.date + ".json", req.session.access_token).then(function(results) {
-            console.log(results)
+        client.get("/activities/date/" + req.params.date + ".json", req.session.access_token, req.params.userId).then(function(results) {
             res.json(results[0]);
         });
     } else {
@@ -85,9 +84,9 @@ router.get('/activities/:date', function(req, res) {
     }
 });
 
-router.get('/heartrate/:date', function(req, res) {
+router.get('/heartrate/:date/:userId', function(req, res) {
     if (req.session.authorized) {
-        client.get("/activities/heart/date/" + req.params.date + "/1d.json", req.session.access_token).then(function(results) {
+        client.get("/activities/heart/date/" + req.params.date + "/1d.json", req.session.access_token, req.params.userId).then(function(results) {
             res.json(results[0]);
         });
     } else {
