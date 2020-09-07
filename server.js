@@ -95,6 +95,28 @@ router.get('/heartrate/:date/:userId', function(req, res) {
     }
 });
 
+router.get('/weight/:date/:userId', function(req, res) {
+    if (req.session.authorized) {
+        client.get("/body/log/weight/date/" + req.params.date + ".json", req.session.access_token, req.params.userId).then(function(results) {
+            res.json(results[0]);
+        });
+    } else {
+        res.status(403);
+        res.json({ errors: [{ message: 'not authorized' }] });
+    }
+});
+
+router.get('/steps/:date/:userId', function(req, res) {
+    if (req.session.authorized) {
+        client.get("/activities/steps/date/"+req.params.date+"/1d.json", req.session.access_token, req.params.userId).then(function(results) {
+            res.json(results[0]);
+        });
+    } else {
+        res.status(403);
+        res.json({ errors: [{ message: 'not authorized' }] });
+    }
+});
+
 // launch the server
 router.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function() {
     console.log('server listening');

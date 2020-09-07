@@ -60,10 +60,10 @@
                 <br/>
                 <div class="well user">
                     <div class="row">
-                        <h3 class="span12">Me</h3>
                         <button class="span2 btn btn-info" onclick="getMyActivities('2020-09-02', '-')">2020-09-02</button>
                         <button class="span2 btn btn-info" onclick=" getMyActivities( '2020-09-03', '-')">2020-09-03</button>
                         <button class="span2 btn btn-info" onclick=" getMyActivities( '2020-09-04', '-')">2020-09-04</button>
+                        <button class="span2 btn btn-info" onclick=" getMyActivities( '2020-09-07', '-')">2020-09-07</button>
                     </div>
                     <div class="row my-activities">
 
@@ -71,8 +71,11 @@
                     <div class="row my-heartrate">
 
                     </div>
+                    <div class="row my-weight">
+
+                    </div>
                 </div>
-                <br/>
+                <!-- <br/>
                 <div class="well user">
                     <div class="row">
                         <h3 class="span12">David Archer</h3>
@@ -86,7 +89,7 @@
                     <div class="row heartrate">
 
                     </div>
-                </div>
+                </div> -->
                 <br/>
                 <br/>
                 <p style="display:none;">
@@ -106,6 +109,12 @@
                     </div>
                     <div class="card card-block">
                         <p class="response-heartrate"></p>
+                    </div>
+                    <div class="card card-block">
+                        <p class="response-weight"></p>
+                    </div>
+                    <div class="card card-block">
+                        <p class="response-steps"></p>
                     </div>
                 </div>
 
@@ -190,41 +199,75 @@
             }).fail(function(error) {
                 $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(error));
             });
-        }
 
-        function getActivities(date, userId) {
-            $.getJSON('/activities/' + date + '/' + userId).done(function(response) {
+            $.getJSON('/weight/' + date + '/' + userId).done(function(response) {
                 var html = '<div>';
-                html += '<h3 class="span12">' + date + '</h3>';
-                html += '<p class="span12">steps : ' + response.summary.steps + '</p>';
-                html += '<p class="span12">distance : ' + response.summary.distances[0].distance + '</p>';
-                html += '<p class="span12">caloriesOut : ' + response.summary.caloriesOut + '</p>';
-                html += '</div>';
-                $('.activities').html(html);
+                html += '<h3 class="span12">Weight</h3>';
+                for(var i=0; i<response.weight.length; i++) {
+                    html += '<p class="span12">bmi : ' + response.weight[i].bmi + '</p>';
+                    html += '<p class="span12">weight : ' + response.weight[i].weight + '</p>';
+                    html += '<p class="span12" style="margin-bottom:20px;">datetime : ' + response.weight[i].date + ' ' + response.weight[i].time + '</p>';
+                }                
 
-                // $('p.response-activities').html(" <strong>activities</strong> : " + JSON.stringify(response));
+                html += '</div>';
+                $('.my-weight').html(html);
+
+                $('p.response-weight').html(" <strong>weight</strong> : " + JSON.stringify(response));
             }).fail(function(error) {
-                // $('p.response-activities').html(" <strong>activities</strong> : " + JSON.stringify(error));
+                $('p.response-weight').html(" <strong>weight</strong> : " + JSON.stringify(error));
             });
 
-            $.getJSON('/heartrate/' + date + '/' + userId).done(function(response) {
+            $.getJSON('/steps/' + date + '/' + userId).done(function(response) {
                 var html = '<div>';
-                html += '<h3 class="span12">Heart Rate</h3>';
-                html += '<p class="span12">caloriesOut : ' + response['activities-heart'][0].value.heartRateZones[0].caloriesOut + '</p>';
-                html += '<p class="span12">max : ' + response['activities-heart'][0].value.heartRateZones[0].max + '</p>';
-                html += '<p class="span12">min : ' + response['activities-heart'][0].value.heartRateZones[0].min + '</p>';
-                html += '<p class="span12">minutes : ' + response['activities-heart'][0].value.heartRateZones[0].minutes + '</p>';
-                html += '<p class="span12">restingHeartRate : ' + response['activities-heart'][0].value.restingHeartRate + '</p>';
+                html += '<h3 class="span12">steps</h3>';
+                // for(var i=0; i<response.weight.length; i++) {
+                //     html += '<p class="span12">bmi : ' + response.weight[i].bmi + '</p>';
+                //     html += '<p class="span12">weight : ' + response.weight[i].weight + '</p>';
+                //     html += '<p class="span12">datetime : ' + response.weight[i].date + ' ' + response.weight[i].time + '</p>';
+                // }                
+
+                html += '</div>';
+                $('.my-steps').html(html);
+
+                $('p.response-steps').html(" <strong>steps</strong> : " + JSON.stringify(response));
+            }).fail(function(error) {
+                $('p.response-steps').html(" <strong>steps</strong> : " + JSON.stringify(error));
+            });
+        }
+
+        // function getActivities(date, userId) {
+        //     $.getJSON('/activities/' + date + '/' + userId).done(function(response) {
+        //         var html = '<div>';
+        //         html += '<h3 class="span12">' + date + '</h3>';
+        //         html += '<p class="span12">steps : ' + response.summary.steps + '</p>';
+        //         html += '<p class="span12">distance : ' + response.summary.distances[0].distance + '</p>';
+        //         html += '<p class="span12">caloriesOut : ' + response.summary.caloriesOut + '</p>';
+        //         html += '</div>';
+        //         $('.activities').html(html);
+
+        //         // $('p.response-activities').html(" <strong>activities</strong> : " + JSON.stringify(response));
+        //     }).fail(function(error) {
+        //         // $('p.response-activities').html(" <strong>activities</strong> : " + JSON.stringify(error));
+        //     });
+
+        //     $.getJSON('/heartrate/' + date + '/' + userId).done(function(response) {
+        //         var html = '<div>';
+        //         html += '<h3 class="span12">Heart Rate</h3>';
+        //         html += '<p class="span12">caloriesOut : ' + response['activities-heart'][0].value.heartRateZones[0].caloriesOut + '</p>';
+        //         html += '<p class="span12">max : ' + response['activities-heart'][0].value.heartRateZones[0].max + '</p>';
+        //         html += '<p class="span12">min : ' + response['activities-heart'][0].value.heartRateZones[0].min + '</p>';
+        //         html += '<p class="span12">minutes : ' + response['activities-heart'][0].value.heartRateZones[0].minutes + '</p>';
+        //         html += '<p class="span12">restingHeartRate : ' + response['activities-heart'][0].value.restingHeartRate + '</p>';
                 
 
-                html += '</div>';
-                $('.heartrate').html(html);
+        //         html += '</div>';
+        //         $('.heartrate').html(html);
 
-                // $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(response));
-            }).fail(function(error) {
-                // $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(error));
-            });
-        }
+        //         // $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(response));
+        //     }).fail(function(error) {
+        //         // $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(error));
+        //     });
+        // }
     </script>
 </body>
 
