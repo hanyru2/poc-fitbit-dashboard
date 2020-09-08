@@ -75,24 +75,13 @@
 
                     </div>
                 </div>
-                <!-- <br/>
-                <div class="well user">
-                    <div class="row">
-                        <h3 class="span12">David Archer</h3>
-                        <button class="span2 btn btn-info" onclick="getActivities('2020-09-02', '8SJLMX')">2020-09-02</button>
-                        <button class="span2 btn btn-info" onclick=" getActivities( '2020-09-03', '8SJLMX')">2020-09-03</button>
-                        <button class="span2 btn btn-info" onclick=" getActivities( '2020-09-04', '8SJLMX')">2020-09-04</button>
-                    </div>
-                    <div class="row activities">
-
-                    </div>
-                    <div class="row heartrate">
-
-                    </div>
-                </div> -->
+                <br/>
+                <div id="chartContainer" style="height: 300px; width: 100%;"></div>
                 <br/>
                 <br/>
-                <p style="display:none;">
+                <div id="stepsContainer" style="height: 300px; width: 100%;"></div>
+                <br/>
+                <p style="display:block;">
                     <a class="btn btn-secondary" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                     Show API Response
                     </a>
@@ -123,6 +112,8 @@
     </div>
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
     <script>
         $.getJSON('/profile').done(function(response) {
             $('a.login').hide();
@@ -195,14 +186,53 @@
                 html += '</div>';
                 $('.my-heartrate').html(html);
 
-                $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(response));
+                var datetime = new Date(date);
+                var dataPoints = [];
+                var limit = 1000;
+                var y = 0;
+                var x = '';
+                var dataset = response['activities-heart-intraday'].dataset;
+                for ( var i = 0; i < dataset.length; i++ ) {
+                    var newTime = dataset[i].time.split(":");
+                    x = new Date(datetime.getFullYear(), ("0" + (datetime.getMonth() + 1)).slice(-2), ("0" + datetime.getDate()).slice(-2), newTime[0], newTime[1]);
+                    y =	dataset[i].value;
+                    dataPoints.push({x: x, y: y });
+                }
+
+                var options = {
+                    animationEnabled: true,
+                    zoomEnabled: true,
+                    title:{
+                        text: "Heart Rate Chart"
+                    }, 
+                    subtitles:[{
+                        text: date
+                    }],
+                    axisX:{
+                        valueFormatString: "H:mm",
+                        crosshair: {
+                            enabled: true,
+                            snapToDataPoint: true
+                        }
+                    },
+                    data: [{
+                        type: "line",
+                        xValueFormatString: "H:mm",
+                        dataPoints: dataPoints
+                    }]
+                };
+                $("#chartContainer").CanvasJSChart(options);
+
+                $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(dataset));
             }).fail(function(error) {
                 $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(error));
             });
 
             $.getJSON('/weight/' + date + '/' + userId).done(function(response) {
                 var html = '<div>';
-                html += '<h3 class="span12">Weight</h3>';
+                if(response.weight.length > 0) {
+                    html += '<h3 class="span12">Weight</h3>';
+                }                
                 for(var i=0; i<response.weight.length; i++) {
                     html += '<p class="span12">bmi : ' + response.weight[i].bmi + '</p>';
                     html += '<p class="span12">weight : ' + response.weight[i].weight + '</p>';
@@ -218,56 +248,48 @@
             });
 
             $.getJSON('/steps/' + date + '/' + userId).done(function(response) {
-                var html = '<div>';
-                html += '<h3 class="span12">steps</h3>';
-                // for(var i=0; i<response.weight.length; i++) {
-                //     html += '<p class="span12">bmi : ' + response.weight[i].bmi + '</p>';
-                //     html += '<p class="span12">weight : ' + response.weight[i].weight + '</p>';
-                //     html += '<p class="span12">datetime : ' + response.weight[i].date + ' ' + response.weight[i].time + '</p>';
-                // }                
+                var datetime = new Date(date);
+                var dataPoints = [];
+                var limit = 1000;
+                var y = 0;
+                var x = '';
+                var dataset = response['activities-steps-intraday'].dataset;
+                for ( var i = 0; i < dataset.length; i++ ) {
+                    var newTime = dataset[i].time.split(":");
+                    x = new Date(datetime.getFullYear(), ("0" + (datetime.getMonth() + 1)).slice(-2), ("0" + datetime.getDate()).slice(-2), newTime[0], newTime[1]);
+                    y =	dataset[i].value;
+                    dataPoints.push({x: x, y: y });
+                }
 
-                html += '</div>';
-                $('.my-steps').html(html);
+                var options = {
+                    animationEnabled: true,
+                    zoomEnabled: true,
+                    title:{
+                        text: "Steps Chart"
+                    }, 
+                    subtitles:[{
+                        text: date
+                    }],
+                    axisX:{
+                        valueFormatString: "H:mm",
+                        crosshair: {
+                            enabled: true,
+                            snapToDataPoint: true
+                        }
+                    },
+                    data: [{
+                        type: "line",
+                        xValueFormatString: "H:mm",
+                        dataPoints: dataPoints
+                    }]
+                };
+                $("#stepsContainer").CanvasJSChart(options);
 
                 $('p.response-steps').html(" <strong>steps</strong> : " + JSON.stringify(response));
             }).fail(function(error) {
                 $('p.response-steps').html(" <strong>steps</strong> : " + JSON.stringify(error));
             });
         }
-
-        // function getActivities(date, userId) {
-        //     $.getJSON('/activities/' + date + '/' + userId).done(function(response) {
-        //         var html = '<div>';
-        //         html += '<h3 class="span12">' + date + '</h3>';
-        //         html += '<p class="span12">steps : ' + response.summary.steps + '</p>';
-        //         html += '<p class="span12">distance : ' + response.summary.distances[0].distance + '</p>';
-        //         html += '<p class="span12">caloriesOut : ' + response.summary.caloriesOut + '</p>';
-        //         html += '</div>';
-        //         $('.activities').html(html);
-
-        //         // $('p.response-activities').html(" <strong>activities</strong> : " + JSON.stringify(response));
-        //     }).fail(function(error) {
-        //         // $('p.response-activities').html(" <strong>activities</strong> : " + JSON.stringify(error));
-        //     });
-
-        //     $.getJSON('/heartrate/' + date + '/' + userId).done(function(response) {
-        //         var html = '<div>';
-        //         html += '<h3 class="span12">Heart Rate</h3>';
-        //         html += '<p class="span12">caloriesOut : ' + response['activities-heart'][0].value.heartRateZones[0].caloriesOut + '</p>';
-        //         html += '<p class="span12">max : ' + response['activities-heart'][0].value.heartRateZones[0].max + '</p>';
-        //         html += '<p class="span12">min : ' + response['activities-heart'][0].value.heartRateZones[0].min + '</p>';
-        //         html += '<p class="span12">minutes : ' + response['activities-heart'][0].value.heartRateZones[0].minutes + '</p>';
-        //         html += '<p class="span12">restingHeartRate : ' + response['activities-heart'][0].value.restingHeartRate + '</p>';
-                
-
-        //         html += '</div>';
-        //         $('.heartrate').html(html);
-
-        //         // $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(response));
-        //     }).fail(function(error) {
-        //         // $('p.response-heartrate').html(" <strong>heartrate</strong> : " + JSON.stringify(error));
-        //     });
-        // }
     </script>
 </body>
 
